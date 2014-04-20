@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">stockPartOne</string>
+    <string name="Stock_Search">Stock Search</string>
+    <string name="action_settings">Settings</string>
+    <string name="Search">Search</string>
+    <string name="input">Enter Stock Symbol</string>
+
+</resources>
