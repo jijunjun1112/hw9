@@ -288,8 +288,7 @@
         android:layout_marginLeft="20dp"
         android:layout_alignLeft="@+id/textView13"
         android:layout_below="@+id/textView25"
-        android:text="News Headlines" 
-        android:visibility="invisible"/>
+        android:text="News Headlines" />
 
     <Button
         android:id="@+id/button2"
@@ -298,16 +297,7 @@
         android:layout_alignBottom="@+id/button1"
         android:layout_alignParentRight="true"
         android:layout_marginRight="20dp"
-        android:text="Facebook" 
-        android:visibility="invisible"/>
-    
-    <com.facebook.widget.LoginButton
-        android:id="@+id/authButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
-        android:layout_marginTop="30dp"
-        />
+        android:text="Facebook" />
 
 </RelativeLayout>
 </ScrollView>

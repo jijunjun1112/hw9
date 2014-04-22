@@ -9,10 +9,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.app.Activity;
-import android.app.AlertDialog;
-import android.app.AlertDialog.Builder;
-import android.app.Dialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -55,35 +51,16 @@ public class NewsActivity extends Activity {
 
 				@Override
 				public void onItemClick(AdapterView<?> parent, View view,
-						final int position, long id) {
-					AlertDialog.Builder builder=new Builder(NewsActivity.this);
-					builder.setTitle("View News");
-					
-
-					builder.setItems(new String[]{"View","Cancel"}, new DialogInterface.OnClickListener(){
-
-						@Override
-						public void onClick(DialogInterface dialog, int which) {
-							if(which==0){
-								String link = null;
-								try {
-									link = items.getJSONObject(position).getString("Link");
-									Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(link));
-									startActivity(intent);
-								} catch (JSONException e) {
-									
-									e.printStackTrace();
-								}
-							}else{
-								dialog.dismiss();
-							}
-							
-						}
-						
-					});
-					
-					builder.create().show();
-					
+						int position, long id) {
+					String link = null;
+					try {
+						link = items.getJSONObject(position).getString("Link");
+						Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(link));
+						startActivity(intent);
+					} catch (JSONException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
 					
 					
 				}

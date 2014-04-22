@@ -1,5 +1,7 @@
 package com.example.stockpartone;
 
+
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -7,37 +9,17 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import com.facebook.FacebookException;
-import com.facebook.FacebookOperationCanceledException;
-import com.facebook.FacebookRequestError;
-import com.facebook.HttpMethod;
-import com.facebook.LoggingBehavior;
-import com.facebook.Request;
-import com.facebook.RequestAsyncTask;
-import com.facebook.Response;
-import com.facebook.Session;
-import com.facebook.SessionState;
-import com.facebook.Settings;
-import com.facebook.Session.StatusCallback;
-import com.facebook.model.GraphUser;
-import com.facebook.widget.WebDialog;
-import com.facebook.widget.WebDialog.OnCompleteListener;
-import com.facebook.UiLifecycleHelper;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.support.v4.app.FragmentActivity;
 import android.support.v7.app.ActionBarActivity;
 import android.text.Editable;
 import android.text.Html;
@@ -47,7 +29,6 @@ import android.text.TextWatcher;
 import android.util.Log;
 import android.view.Display;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
@@ -56,20 +37,10 @@ import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
-import android.widget.Toast;
 
-public class MainActivity extends FragmentActivity {
-	
-	private Session.StatusCallback statusCallback = new SessionStatusCallback();
-	private static final String TAG = "MainFragment";
-	private UiLifecycleHelper uiHelper;
-	private Button shareButton;
-	private static final List<String> PERMISSIONS = Arrays.asList("publish_actions");
-	private static final String PENDING_PUBLISH_KEY = "pendingPublishReauthorization";
-	private boolean pendingPublishReauthorization = false;
-	
+public class MainActivity extends ActionBarActivity {
 	EditText symbol_input_edit;
-	int flag=0;
+	int flag=1;
 	int q=1;
 	String [] autoStr=null;
 	
@@ -110,15 +81,9 @@ public class MainActivity extends FragmentActivity {
 	Button news_btn;
 	Button facebook_btn;
 	AutoCompleteTextView textView;
-	
-	private MainFragment mainFragment;
-	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		//uiHelper = new UiLifecycleHelper(this, callback);
-	    //uiHelper.onCreate(savedInstanceState);
-	    
 		setContentView(R.layout.activity_main);
 		textView1=(TextView) findViewById(R.id.textView1);
 		textView2=(TextView) findViewById(R.id.textView2);
@@ -150,21 +115,6 @@ public class MainActivity extends FragmentActivity {
 		news_btn=(Button) findViewById(R.id.button1);
 		facebook_btn=(Button) findViewById(R.id.button2);
 		
-		Settings.addLoggingBehavior(LoggingBehavior.INCLUDE_ACCESS_TOKENS);
-
-        Session session = Session.getActiveSession();
-        if (session == null) {
-            if (savedInstanceState != null) {
-                session = Session.restoreSession(this, null, statusCallback, savedInstanceState);
-            }
-            if (session == null) {
-                session = new Session(this);
-            }
-            Session.setActiveSession(session);
-            if (session.getState().equals(SessionState.CREATED_TOKEN_LOADED)) {
-                session.openForRead(new Session.OpenRequest(this).setCallback(statusCallback));
-            }
-        }
 		autoComplete();
 
 		search_btn.setOnClickListener(new View.OnClickListener(){
@@ -187,247 +137,7 @@ public class MainActivity extends FragmentActivity {
 				
 			}
 		});
-		facebook_btn.setOnClickListener(new View.OnClickListener(){
-			Session session = Session.getActiveSession();
-			@Override
-			public void onClick(View v) {
-				if (!session.isOpened()){
-					onClickLogin();
-				}else {
-					
-					publishFeedDialog();
-				}
-				
-			}
-		});
 	}
-	
-	/* (non-Javadoc)
-	 * @see android.support.v4.app.FragmentActivity#onActivityResult(int, int, android.content.Intent)
-	 */
-	@Override
-	protected void onActivityResult(int arg0, int arg1, Intent arg2) {
-		// TODO Auto-generated method stub
-		Log.i("onActivityResult","onActivityResult");
-		super.onActivityResult(arg0, arg1, arg2);
-		Session.getActiveSession().onActivityResult(this, arg0, arg1, arg2);
-	}
-
-	/* (non-Javadoc)
-	 * @see android.support.v4.app.FragmentActivity#onSaveInstanceState(android.os.Bundle)
-	 */
-	@Override
-	protected void onSaveInstanceState(Bundle outState) {
-		// TODO Auto-generated method stub
-		Log.i("saveinstantcestate","saveinstantcestate");
-		super.onSaveInstanceState(outState);
-		Session session = Session.getActiveSession();
-        Session.saveSession(session, outState);
-	}
-
-	private void onSessionStateChange(Session session, SessionState state, Exception exception) {
-	    if (state.isOpened()) {
-	    	if(flag==1){
-	    		publishFeedDialog();
-	    		flag=0;
-	    	}
-	    	
-	    	Log.i("sessionstatechange","sessionstatechange");
-	    	if(pendingPublishReauthorization==true){
-	    		Log.i(TAG,"pendingPublishReauthorization:true");
-	    	}else{
-	    		Log.i(TAG,"pendingPublishReauthorization:false");
-	    	}
-	    	if(state.equals(SessionState.OPENED_TOKEN_UPDATED)){
-	    		Log.i(TAG,"SessionState.OPENED_TOKEN_UPDATED:true");
-	    	}else{
-	    		Log.i(TAG,"SessionState.OPENED_TOKEN_UPDATED:false");
-	    	}
-	    	
-	    	if (pendingPublishReauthorization && 
-	    	        state.equals(SessionState.OPENED_TOKEN_UPDATED)) {
-	    	    pendingPublishReauthorization = false;
-	    	    //publishStory();
-	    	    publishFeedDialog();
-	    	}
-	    	
-	    	System.out.println("log in");
-	        Log.i(TAG, "Logged in...");
-	    } else if (state.isClosed()) {
-	    	System.out.println("log out");
-	        Log.i(TAG, "Logged out...");
-	    }
-	}
-	private class SessionStatusCallback implements Session.StatusCallback {
-        @Override
-        public void call(Session session, SessionState state, Exception exception) {
-        	Session session1 = Session.getActiveSession();
-        	onSessionStateChange(session, state, exception);
-            if (session1.isOpened()) {
-                Log.i("open","session is open");
-                //publishFeedDialog();
-                //publishStory();
-            } else {
-                Log.i("close","session is close");
-               // publishFeedDialog();
-            }
-        }
-    }
-	
-	private void onClickLogin() {
-        Session session = Session.getActiveSession();
-        if (!session.isOpened() && !session.isClosed()) {
-        	Log.i("openforread","openforread");
-        	
-            session.openForRead(new Session.OpenRequest(this).setCallback(statusCallback));
-        } else {
-        	Log.i("openactivesession","openactivesession");
-            Session.openActiveSession(this, true, statusCallback);
-            //publishFeedDialog();
-        }
-    }
-	private void onClickLogout() {
-        Session session = Session.getActiveSession();
-        if (!session.isClosed()) {
-            session.closeAndClearTokenInformation();
-        }
-    }
-	private boolean isSubsetOf(Collection<String> subset, Collection<String> superset) {
-	    for (String string : subset) {
-	        if (!superset.contains(string)) {
-	            return false;
-	        }
-	    }
-	    return true;
-	}
-	private void publishStory() {
-	    Session session = Session.getActiveSession();
-
-	    if (session != null){
-
-	        // Check for publish permissions    
-	        List<String> permissions = session.getPermissions();
-	        if (!isSubsetOf(PERMISSIONS, permissions)) {
-	            pendingPublishReauthorization = true;
-	            Session.NewPermissionsRequest newPermissionsRequest = new Session
-	                    .NewPermissionsRequest(this, PERMISSIONS);
-	        session.requestNewPublishPermissions(newPermissionsRequest);
-	            return;
-	        }
-
-	        Bundle postParams = new Bundle();
-	        postParams.putString("name", "Facebook SDK for Android");
-	        postParams.putString("caption", "Build great social apps and get more installs.");
-	        postParams.putString("description", "The Facebook SDK for Android makes it easier and faster to develop Facebook integrated Android apps.");
-	        postParams.putString("link", "https://developers.facebook.com/android");
-	        postParams.putString("picture", "https://raw.github.com/fbsamples/ios-3.x-howtos/master/Images/iossdk_logo.png");
-
-	        Request.Callback callback= new Request.Callback() {
-	            public void onCompleted(Response response) {
-	                JSONObject graphResponse = response
-	                                           .getGraphObject()
-	                                           .getInnerJSONObject();
-	                String postId = null;
-	                try {
-	                    postId = graphResponse.getString("id");
-	                } catch (JSONException e) {
-	                    Log.i(TAG,
-	                        "JSON error "+ e.getMessage());
-	                }
-	                FacebookRequestError error = response.getError();
-	                if (error != null) {
-	                    Toast.makeText(getApplicationContext(),
-	                         error.getErrorMessage(),
-	                         Toast.LENGTH_SHORT).show();
-	                    } else {
-	                        Toast.makeText(getApplicationContext(), 
-	                             postId,
-	                             Toast.LENGTH_LONG).show();
-	                }
-	            }
-	        };
-
-	        Request request = new Request(session, "me/feed", postParams, 
-	                              HttpMethod.POST, callback);
-
-	        RequestAsyncTask task = new RequestAsyncTask(request);
-	        task.execute();
-	    }
-
-	}
-	private void publishFeedDialog() {
-		Log.i("publishFeedDialog","publishFeedDialog");
-	    Bundle params = new Bundle();
-	    try {
-			params.putString("name", json.getJSONObject("result").getString("Name"));
-			params.putString("caption", "Stock information of "+json.getJSONObject("result").getString("Name")
-					+"("+json.getJSONObject("result").getString("Symbol")+")");
-		    params.putString("description", "Last Trade Price: "+json.getJSONObject("result").getJSONObject("Quote").getString("LastTradePriceOnly")
-		    		+" Change:"+json.getJSONObject("result").getJSONObject("Quote").getString("Change")
-		    		+"("+json.getJSONObject("result").getJSONObject("Quote").getString("ChangeInPercent")+")");
-		    
-		    params.putString("link", "http://finance.yahoo.com/q?s="+textView.getText().toString());
-		    params.putString("picture", json.getJSONObject("result").getString("StockChartImageURL"));
-		} catch (JSONException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	    
-
-	    
-	    WebDialog feedDialog = (
-	        new WebDialog.FeedDialogBuilder(MainActivity.this,
-	            Session.getActiveSession(),
-	            params))
-	        .setOnCompleteListener(new OnCompleteListener() {
-
-				@Override
-				public void onComplete(Bundle values, FacebookException error) {
-					if (error == null) {
-	                    // When the story is posted, echo the success
-	                    // and the post Id.
-	                    final String postId = values.getString("post_id");
-	                    if (postId != null) {
-	                        Toast.makeText(getApplicationContext(),
-	                            "Posted Successful: "+postId,
-	                            Toast.LENGTH_SHORT).show();
-	                    } else {
-	                        // User clicked the Cancel button
-	                        Toast.makeText(getApplicationContext(), 
-	                            "Publish cancelled", 
-	                            Toast.LENGTH_SHORT).show();
-	                    }
-	                } else if (error instanceof FacebookOperationCanceledException) {
-	                    // User clicked the "x" button
-	                    Toast.makeText(getApplicationContext(), 
-	                        "Publish cancelled", 
-	                        Toast.LENGTH_SHORT).show();
-	                } else {
-	                    // Generic, ex: network error
-	                    Toast.makeText(getApplicationContext(), 
-	                        "Error posting story", 
-	                        Toast.LENGTH_SHORT).show();
-	                }
-					
-				}
-
-	        })
-	        .build();
-	    feedDialog.show();
-	}
-	@Override
-    public void onStart() {
-		Log.i("start","start");
-        super.onStart();
-        Session.getActiveSession().addCallback(statusCallback);
-    }
-
-    @Override
-    public void onStop() {
-    	Log.i("stop","stop");
-        super.onStop();
-        Session.getActiveSession().removeCallback(statusCallback);
-    }
 	TextWatcher tw1=null;
 	public void autoComplete(){
 		textView=(AutoCompleteTextView) findViewById(R.id.symbol_input);
@@ -650,7 +360,6 @@ public class MainActivity extends FragmentActivity {
 		
 	}
 	public String[] getAutoCompleteData(){
-
 		symbol_input_edit=(EditText) findViewById(R.id.symbol_input);
 		String symbolStr=symbol_input_edit.getText().toString();
 		Log.i("symbolStr",symbolStr);		
